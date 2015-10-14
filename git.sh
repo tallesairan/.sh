@@ -9,6 +9,8 @@ function Main {
     echo $(pwd)
     git=$(git status)
     verify $dir
+
+    
 }
 
 function verify {
@@ -25,6 +27,8 @@ function verify {
 	    git push
 	fi
     done
+    clear
+    echo Ok: $(pwd)
 }
 
 Main
