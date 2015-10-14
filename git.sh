@@ -7,7 +7,6 @@ nothing to commit, working directory clean"
 function Main {
     dir=~/.sh
     echo $(pwd)
-    git=$(git status)
     verify $dir
 
     
@@ -17,7 +16,7 @@ function verify {
     batata=false
     cd $1
     while [ $batata == false ]; do
-	if [ "$git" == "$ok" ]; then
+	if [ "$(git status)" == "$ok" ]; then
 	    echo Ok: $(pwd)
 	    batata=true
 	else
