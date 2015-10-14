@@ -1,18 +1,30 @@
 #!/bin/bash
 
-cd ~/.sh
-echo $(pwd)
-git=$(git status)
 ok="On branch master
 Your branch is up-to-date with 'origin/master'.
 nothing to commit, working directory clean"
 
-if [ "$git" == "$ok" ]; then
-    echo ok
-else
-    echo not ok
-    # git add *
-    # git commit -m $(date)"
-    # git push
-fi
+function Main {
+    dir=~/.sh
+    echo $(pwd)
+    git=$(git status)
+    verify $dir
+}
 
+function verify {
+    batata=false
+    cd $1
+    while [ $batata == false ]; do
+	if [ "$git" == "$ok" ]; then
+	    echo Ok: $(pwd)
+	    batata=true
+	else
+	    echo not ok
+	    git add *
+	    git commit -m "$(date)"
+	    git push
+	fi
+    done
+}
+
+Main
