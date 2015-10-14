@@ -12,7 +12,7 @@ if [ "$git" == "$ok" ]; then
 else
     echo not ok
     # git add *
-    # git commit -m \" "$(date)" \"
+    # git commit -m $(date)"
     # git push
 fi
 
