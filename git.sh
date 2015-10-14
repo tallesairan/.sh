@@ -14,8 +14,9 @@ function Main {
     clear
 
     for file in $dirs; do
-	echo Ok: $file
+	echo Ok: $file 
     done
+    notify-send "ok" "ok"
 }
 
 function verify {
