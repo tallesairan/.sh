@@ -2,4 +2,5 @@
 
 cd ~/.sh
 echo $(pwd)
-git status
+git statuslls
+
