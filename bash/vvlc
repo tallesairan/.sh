@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#read a b c d e
+
+if [ "$1" != "--help" ]; then
+    vlc *$1*$2*$3*$4*$5*
+else
+    echo " "
+    echo vvlc 1.0 vig©© Ltda
+    echo open media \in VLC typing part of the file name.
+    echo sintax:
+    echo vvlc + [part of the file name, case sensitive ] or [--help for this help]
+    echo " "
+    echo 2013©
+fi
+	
+
+    
