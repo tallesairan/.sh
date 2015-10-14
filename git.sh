@@ -4,12 +4,18 @@ ok="On branch master
 Your branch is up-to-date with 'origin/master'.
 nothing to commit, working directory clean"
 
-function Main {
-    dir=~/.sh
-    echo $(pwd)
-    verify $dir
+dirs=" ~/.sh ~/dotfiles"
 
-    
+function Main {
+    for file in $dirs; do
+	verify $file
+    done
+
+    clear
+
+    for file in $dirs; do
+	echo Ok: $file
+    done
 }
 
 function verify {
