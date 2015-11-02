@@ -1,0 +1,80 @@
+#!/bin/bash
+
+#Para fedora 21 64x
+
+{
+    yum update -y
+
+# softwares
+
+    yum install -y emacs
+    yum install -y wget
+    yum install -y vlc
+    yum install -y smplayer
+    yum install -y android-tools  
+    yum install -y feh
+    yum install -y tetex
+    yum install -y eclipse
+    yum install -y gimp 
+
+
+
+# arquivos do i3
+
+    yum install -y i3
+    yum install -y i3status
+
+# arquivos do clementine, incluíndo plugins, RPM fusion etc
+    yum install -y clementine
+    rpm -ivh http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-stable.noarch.rpm
+    yum localinstall --nogpgcheck http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
+    yum update -y
+    yum localinstall --nogpgcheck http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm -y
+    rpm --import /etc/pki/rpm-gpg/RPM-GPG-KEY-adobe-linux
+    rpm -Uvh \ http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-stable.noarch.rpm
+    rpm -Uvh \ http://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-stable.noarch.rpm
+    yum install gstreamer-plugins-ugly gstreamer-plugins-bad \
+	gstreamer-ffmpeg xine-lib-extras-freeworld -y
+    rpm -ivh http://rpm.livna.org/livna-release.rpm
+    yum install libdvdcss -y
+
+
+
+# flash, java, bancos
+
+    yum install http://linuxdownload.adobe.com/adobe-release/adobe-release-x86_64-1.0-1.noarch.rpm -y
+    yum install -y flash-plugin
+   # yum install -y java-1.6.0-openjdk-plugin
+    yum install -y icedtea-web
+    yum install -y mozplugger evince 
+
+
+# chrome
+    echo "[google-chrome]
+name=google-chrome - \$basearch
+baseurl=http://dl.google.com/linux/chrome/rpm/stable/\$basearch
+enabled=1
+gpgcheck=1
+gpgkey=https://dl-ssl.google.com/linux/linux_signing_key.pub " > /etc/yum.repos.d/google-chrome.repo
+    yum install google-chrome-stable -y 
+
+# calibre 
+
+    wget -nv -O- https://raw.githubusercontent.com/kovidgoyal/calibre/master/setup/linux-installer.py | sudo python -c "import sys; main=lambda:sys.stderr.write('Download failed\n'); exec(sys.stdin.read()); main()"
+
+
+####
+
+    yum update -y
+
+# removes
+
+    yum remove -y totem
+    yum remove -y rhythmbox
+
+# dropbox instalar e executar:
+    exit
+    cd ~ && wget -O - "https://www.dropbox.com/download?plat=lnx.x86" | tar xzf -
+    ~/.dropbox-dist/dropboxd
+
+}
