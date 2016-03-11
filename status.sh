@@ -32,12 +32,12 @@ function USIM5() {
     status=${a[1]}
     perc=${a[2]}
 
-    gain300=$(bc -l <<< "300*($value-1.19)")
-    gain200=$(bc -l <<< "200*($value-1.46)")
+    gain300=$(bc -l <<< "300*($value-2.00)")
+    gain200=0
     fullGain=$(bc -l <<< "$gain200 + $gain300")
-    fullPer=$(bc -l <<< "scale=2; 100*($fullGain+357+292)/(357+292)-100" )
+    fullPer=$(bc -l <<< "scale=2; 100*($fullGain+600)/(600)-100" )
     
-    echo "USIM5: $value $status $perc | i1: $gain300 ¤ i2: $gain200 ¤ t: $fullGain ($fullPer%)"
+    echo "USIM5: $value $status $perc | i1: $gain300 ¤ t: $fullGain ($fullPer%) "
 }
 
 
