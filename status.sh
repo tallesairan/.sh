@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-function Main { 
+function MainOld { 
     i3status -c ~/.i3/i3status_top.conf | while :
     do
     	read line
@@ -22,6 +22,23 @@ function Main {
   
 }
 
+function Main {
+    while true
+    do
+	usim5=$(USIM5)
+	weekday=$(WeekDay)
+	day=$(Day)
+	month=$(Month)
+	time=$(Time)
+	vol=$(Volume)
+	year=$(Year)
+
+	echo -e "$usim5 | $weekday, $day $month - $year | $time | $vol "
+
+    done
+}
+
+
 function USIM5() {
     paragraph=$(lynx -dump "http://finance.yahoo.com/q?s=USIM5.SA" |grep -A 2 "Sao Paolo");
     arr=()
@@ -34,7 +51,7 @@ function USIM5() {
     status=${a[1]}
     perc=${a[2]}
 
-    gain300=$(bc -l <<< "300*($value-2.00)")
+    gain300=$(bc -l <<< "400*($value-4.00)")
     gain200=0
     fullGain=$(bc -l <<< "$gain200 + $gain300")
     fullPer=$(bc -l <<< "scale=2; 100*($fullGain+600)/(600)-100" )
@@ -163,6 +180,17 @@ function Volume() {
     vol=$(amixer get Master |grep Left |awk '{print $5}'|sed 's/[^0-9\%]//g')
     echo ♫: $vol
 }
+
+function Day(){
+    day=$(date +%d)
+    echo $day
+}
+
+function Year(){
+    year=$(date +%y)
+    echo 20$year
+}
+
 Main
 
 
