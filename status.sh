@@ -32,8 +32,8 @@ function Main {
 	time=$(Time)
 	vol=$(Volume)
 	year=$(Year)
-
-	echo -e "$usim5 | $weekday, $day $month - $year | $time | $vol "
+	music=$(GetMusic)
+	echo -e "$music | $usim5 | $weekday, $day $month - $year | $time | $vol "
 
     done
 }
@@ -189,6 +189,21 @@ function Day(){
 function Year(){
     year=$(date +%y)
     echo 20$year
+}
+
+function GetMusic() {
+
+    #Spotify
+
+    status=$(qdbus org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.freedesktop.DBus.Properties.Get org.mpris.MediaPlayer2.Player PlaybackStatus)
+    if [ "$status" == "Playing" ];    
+    then
+	artist=$(qdbus org.mpris.MediaPlayer2.spotify / org.freedesktop.MediaPlayer2.GetMetadata | sed -n -e 's/^.*artist: //p')
+	music=$(qdbus org.mpris.MediaPlayer2.spotify / org.freedesktop.MediaPlayer2.GetMetadata | sed -n -e 's/^.*title: //p')
+	echo Spotify: $artist: - $music
+    else
+	echo ""
+    fi
 }
 
 Main
