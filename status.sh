@@ -1,31 +1,10 @@
 #!/bin/bash
 
 
-function MainOld { 
-    i3status -c ~/.i3/i3status_top.conf | while :
-    do
-    	read line
-    	usim5=$(USIM5)
-    	weekday=$(WeekDay)
-    	month=$(Month)
-    	echo -e "$usim5 | $month | $line" || exit 1
-    done
-
-    # primeira linha: lê seu arquivo de status
-    # read line lê o que seu .conf mandaria para a barra
-    # usim5 recebe a informação que quero enviar para a barra
-    # echo envia usim5 e line
-    # no config:
-    # bar {
-    #    status_command i3status | path/to/this/script.sh
-    # }
-  
-}
-
 function Main {
     while true
     do
-	usim5=$(USIM5)
+	usim5=$(stocks USIM5 4 400)
 	weekday=$(WeekDay)
 	day=$(Day)
 	month=$(Month)
@@ -33,30 +12,9 @@ function Main {
 	vol=$(Volume)
 	year=$(Year)
 	music=$(GetMusic)
-	echo -e "$music | $usim5 | $weekday, $day $month - $year | $time | $vol "
+	echo -e "$weekday, $day $month - $year | $time | $usim5 | $vol | $music "
 
     done
-}
-
-
-function USIM5() {
-    paragraph=$(lynx -dump "http://finance.yahoo.com/q?s=USIM5.SA" |grep -A 2 "Sao Paolo");
-    arr=()
-    while read -r line; do
-	arr+=("$line")
-    done <<< "$paragraph"
-    
-    a=( ${arr[1]} )
-    value=${a[0]}
-    status=${a[1]}
-    perc=${a[2]}
-
-    gain300=$(bc -l <<< "400*($value-4.00)")
-    gain200=0
-    fullGain=$(bc -l <<< "$gain200 + $gain300")
-    fullPer=$(bc -l <<< "scale=2; 100*($fullGain+600)/(600)-100" )
-    
-    echo "USIM5: $value $status $perc | i1: $gain300 ¤ t: $fullGain ($fullPer%) "
 }
 
 function WeekDay() {
@@ -220,3 +178,24 @@ Main
 
 
 
+
+# function MainOld { 
+#     i3status -c ~/.i3/i3status_top.conf | while :
+#     do
+#     	read line
+#     	usim5=$(USIM5)
+#     	weekday=$(WeekDay)
+#     	month=$(Month)
+#     	echo -e "$usim5 | $month | $line" || exit 1
+#     done
+
+#     # primeira linha: lê seu arquivo de status
+#     # read line lê o que seu .conf mandaria para a barra
+#     # usim5 recebe a informação que quero enviar para a barra
+#     # echo envia usim5 e line
+#     # no config:
+#     # bar {
+#     #    status_command i3status | path/to/this/script.sh
+#     # }
+  
+# }
