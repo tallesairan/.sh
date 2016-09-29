@@ -200,7 +200,17 @@ function GetMusic() {
     then
 	artist=$(qdbus org.mpris.MediaPlayer2.spotify / org.freedesktop.MediaPlayer2.GetMetadata | sed -n -e 's/^.*artist: //p')
 	music=$(qdbus org.mpris.MediaPlayer2.spotify / org.freedesktop.MediaPlayer2.GetMetadata | sed -n -e 's/^.*title: //p')
-	echo Spotify: $artist: - $music
+	artista=$(echo ${artist:0:20})
+	musica=$(echo ${music:0:20})
+	if [ "$artista" != "$artist" ];
+	then
+	    artista=$(echo $artista...)
+	fi
+	if [ "$musica" != "$music" ];
+	then
+	    musica=$(echo $musica... )
+	fi
+	echo Spotify: $artista - $musica
     else
 	echo ""
     fi
