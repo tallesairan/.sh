@@ -21,7 +21,7 @@ function Main(){
 	status=${a[1]}
 	perct=${a[2]}
 
-	if [ "$buyin" == "" ] || [ "$qtdde" == ""];
+	if [ "$buyin" == " " ] || [ "$qtdde" == " " ];
 	then
 	    echo $stock: $value $status $perct
 	else
