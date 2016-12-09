@@ -1,0 +1,7 @@
+#!/bin/bash
+
+a="$@"
+
+git commit -a -m "$(echo $a)"
+
+
