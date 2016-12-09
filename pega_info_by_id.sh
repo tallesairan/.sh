@@ -37,8 +37,9 @@ function GetPrices(){
     i=0
     while read line
     do
-	nome[i]=$line
-	preco[i]=$($func $link$line | grep $flag1 | sed "$flag2" | sed "$flag3")
+	nome[i]=$(echo $line |tr -d '\n\r' | tr '[:upper:]' '[:lower:]')
+	preco[i]=$($func $link${nome[i]} | grep $flag1 | sed "$flag2" | sed "$flag3")
+	preco[i]=$(echo ${preco[i]} |head -8)
 	((i++))
     done<$file
     tam=$i
@@ -47,9 +48,9 @@ function GetPrices(){
 function PrintTable(){
     for (( i=0; i<$tam;i++))
     do
-	printf "%s \t %s\n" "${nome[$i]}" "${preco[$i]}"
+	printf "%-5s %-30s %s\n"  "$i" "${nome[i]}" "${preco[i]}"
     done
-
+    echo " "
     echo vig©© dev ltda
     echo 2016©
 }
