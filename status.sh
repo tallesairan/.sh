@@ -4,7 +4,7 @@
 function Main {
     while true
     do
-	usim5=$(stocks USIM5 4 500)
+	usim5=$(stocks USIM5 4.62 400)
 	weekday=$(WeekDay)
 	day=$(Day)
 	month=$(Month)
