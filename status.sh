@@ -4,15 +4,15 @@
 function Main {
     while true
     do
-	usim5=$(stocks USIM5 4.62 400)
-	weekday=$(WeekDay)
-	day=$(Day)
-	month=$(Month)
-	time=$(Time)
-	vol=$(Volume)
-	year=$(Year)
-	music=$(GetMusic)
-	echo -e "$weekday, $day $month - $year | $time | $usim5 | $vol | $music "
+    	# usim5=$(stocks USIM5 4.62 400)
+    	weekday=$(WeekDay)
+    	day=$(Day)
+    	month=$(Month)
+    	time=$(Time)
+    	vol=$(Volume)
+    	year=$(Year)
+    	# music=$(GetMusic)
+    	echo -e "$weekday, $day $month - $year | $time | $usim5 | $vol | $music "
 
     done
 }
@@ -62,70 +62,70 @@ function WeekDay() {
 
 function Month(){
     jan="январь"
-fev="февраль"
-mar="март"
-abr="апрель"
-mai="май"
-jun="июнь"
-jul="июль"
-ago="август"
-set="сентябрь"
-out="октябрь"
-nov="ноябрь"
-dez="декабрь"
+    fev="февраль"
+    mar="март"
+    abr="апрель"
+    mai="май"
+    jun="июнь"
+    jul="июль"
+    ago="август"
+    set="сентябрь"
+    out="октябрь"
+    nov="ноябрь"
+    dez="декабрь"
 
-month=$(date +%m)
+    month=$(date +%m)
 
 
-case $month in 01)
-     echo $jan
-     ;;
+    case $month in 01)
+		       echo $jan
+		       ;;
 
-02)
-     echo $fev
-     ;;
+		    02)
+			echo $fev
+			;;
 
-03)
-     echo $mar
-     ;;
+		    03)
+			echo $mar
+			;;
 
-04)
-     echo $abr
-     ;;
+		    04)
+			echo $abr
+			;;
 
-05)
-     echo $mai
-     ;;
+		    05)
+			echo $mai
+			;;
 
-06)
-     echo $jun
-     ;;
+		    06)
+			echo $jun
+			;;
 
-07)
-     echo $jul
-     ;;
+		    07)
+			echo $jul
+			;;
 
-08)
-     echo $ago
-     ;;
+		    08)
+			echo $ago
+			;;
 
-09)
-     echo $set
-     ;;
+		    09)
+			echo $set
+			;;
 
-10)
-     echo $out
-     ;;
+		    10)
+			echo $out
+			;;
 
-11)
-     echo $nov
-     ;;
+		    11)
+			echo $nov
+			;;
 
-12)
-     echo $dez
-     ;;
+		    12)
+			echo $dez
+			;;
 
-esac
+    esac
 
 }
 
@@ -135,8 +135,9 @@ function Time() {
 }
 
 function Volume() {
-    vol=$(amixer get Master |grep Left |awk '{print $5}'|sed 's/[^0-9\%]//g')
-    echo ♫: $vol
+    vol_embrapa=$(amixer get Master |grep "Mono: Playback" |awk '{print $4}'|sed 's/[^0-9\%]//g')
+    # vol=$(amixer get Master |grep Left |awk '{print $5}'|sed 's/[^0-9\%]//g')
+    echo ♫: $vol_embrapa
 }
 
 function Day(){
@@ -197,5 +198,5 @@ Main
 #     # bar {
 #     #    status_command i3status | path/to/this/script.sh
 #     # }
-  
+
 # }
