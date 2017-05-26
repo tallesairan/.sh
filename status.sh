@@ -4,7 +4,7 @@
 function Main {
     while true
     do
-	usim5=$(stocks USIM5 4.62 400)
+#	usim5=$(stocks BEES3 3.47 600)
 	weekday=$(WeekDay)
 	day=$(Day)
 	month=$(Month)
@@ -61,71 +61,71 @@ function WeekDay() {
 
 
 function Month(){
-    jan="январь"
-fev="февраль"
-mar="март"
-abr="апрель"
-mai="май"
-jun="июнь"
-jul="июль"
-ago="август"
-set="сентябрь"
-out="октябрь"
-nov="ноябрь"
-dez="декабрь"
+    jan="января"
+    fev="февраля"
+    mar="марта"
+    abr="апреля"
+    mai="мая"
+    jun="июня"
+    jul="июля"
+    ago="августа"
+    set="сентября"
+    out="октября"
+    nov="ноября"
+    dez="декабря"
 
-month=$(date +%m)
+    month=$(date +%m)
 
 
-case $month in 01)
-     echo $jan
-     ;;
+    case $month in 01)
+		       echo $jan
+		       ;;
 
-02)
-     echo $fev
-     ;;
+		    02)
+			echo $fev
+			;;
 
-03)
-     echo $mar
-     ;;
+		    03)
+			echo $mar
+			;;
 
-04)
-     echo $abr
-     ;;
+		    04)
+			echo $abr
+			;;
 
-05)
-     echo $mai
-     ;;
+		    05)
+			echo $mai
+			;;
 
-06)
-     echo $jun
-     ;;
+		    06)
+			echo $jun
+			;;
 
-07)
-     echo $jul
-     ;;
+		    07)
+			echo $jul
+			;;
 
-08)
-     echo $ago
-     ;;
+		    08)
+			echo $ago
+			;;
 
-09)
-     echo $set
-     ;;
+		    09)
+			echo $set
+			;;
 
-10)
-     echo $out
-     ;;
+		    10)
+			echo $out
+			;;
 
-11)
-     echo $nov
-     ;;
+		    11)
+			echo $nov
+			;;
 
-12)
-     echo $dez
-     ;;
+		    12)
+			echo $dez
+			;;
 
-esac
+    esac
 
 }
 
@@ -197,5 +197,5 @@ Main
 #     # bar {
 #     #    status_command i3status | path/to/this/script.sh
 #     # }
-  
+
 # }

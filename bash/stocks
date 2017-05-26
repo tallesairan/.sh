@@ -10,26 +10,23 @@ function Main(){
     then
 	echo " "
     else
-	paragraph=$(w3m -no-cookie "http://finance.yahoo.com/q?s=$stock.SA" |grep -A 2 "Sao Paolo");
-	arr=()
-	while read -r line; do
-	    arr+=("$line")
-	done <<< "$paragraph"
-	
-	a=( ${arr[1]} )
-	value=${a[0]}
-	status=${a[1]}
-	perct=${a[2]}
+	paragraph=$(w3m -no-cookie "https://www.google.com/search?q=$stock.SA" |grep "Brasil");
 
-	if [ "$buyin" == " " ] || [ "$qtdde" == " " ];
+	
+	a=( ${paragraph} )
+	value=${a[1]}
+	status=${a[2]}
+	perct=${a[3]}
+
+	if [ "$buyin" == "" ] || [ "$qtdde" == "" ];
 	then
-	    echo $stock: $value $status $perct
+	    echo "$stock: $value $status $perct"
 	else
 	    gain=$(bc -l <<< "$qtdde*($value-$buyin)")
 	    totalBuyed=$(bc -l <<< "$qtdde*$buyin")
 	    perc=$(bc -l <<< "scale=2; 100*($totalBuyed+$gain)/$totalBuyed-100")
 	    echo "$stock: $value $status $perct ¤ $gain ($perc%) "
-	fi
+	 fi
     fi
     
 }
