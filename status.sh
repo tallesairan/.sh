@@ -1,20 +1,24 @@
 #!/bin/bash
 
 
-function Main {
-    while true
-    do
-    	# usim5=$(stocks USIM5 4.62 400)
-    	weekday=$(WeekDay)
-    	day=$(Day)
-    	month=$(Month)
-    	time=$(Time)
-    	vol=$(Volume)
-    	year=$(Year)
-    	# music=$(GetMusic)
-    	echo -e "$weekday, $day $month - $year | $time | $usim5 | $vol | $music "
+# function Main {
+#     while true
+#     do
+#     	# usim5=$(stocks USIM5 4.62 400)
+#     	weekday=$(WeekDay)
+#     	day=$(Day)
+#     	month=$(Month)
+#     	time=$(Time)
+#     	vol=$(Volume)
+#     	year=$(Year)
+#     	# music=$(GetMusic)
+#     	echo -e "$weekday, $day $month - $year | $time | $usim5 | $vol | $music "
 
-    done
+#     done
+# }
+
+function Main {
+    ~/.sh/bash/status.exec
 }
 
 function WeekDay() {
