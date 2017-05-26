@@ -84,7 +84,7 @@ void *getVolume(void *arg) {
   FILE *fp;
 
   while(1) {
-    fp = popen("~/.sh/getVolume.sh","r");
+    fp = popen("~/.sh/status/shell_scripts/getVolume.sh","r");
     if (fp == NULL ){
       volume="ERROR GETTING VOLUME";
       break;
