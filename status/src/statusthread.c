@@ -32,17 +32,21 @@ volatile DateTime datetime;
 pthread_t th[NUMTHREADS];
 pthread_mutex_t mutex;
 volatile struct tm *current;
-volatile char *volume;
+volatile char *vol;
 
 // main
 
 int main() {
-  int err[3];
+  int err[NUMTHREADS], i=0;
   pthread_mutex_init(&mutex,NULL);
 
-  err[0] = pthread_create(&(th[0]),NULL,&printInfo,NULL);
-  err[1] = pthread_create(&(th[1]),NULL,&updateTime,NULL);
-  err[2] = pthread_create(&(th[2]),NULL,&getDate,NULL);
+  err[i] = pthread_create(&(th[i]),NULL,&printInfo,NULL);
+  i++;
+  err[i] = pthread_create(&(th[i]),NULL,&updateTime,NULL);
+  i++;
+  err[i] = pthread_create(&(th[i]),NULL,&getDate,NULL);
+  i++;
+  err[i] = pthread_create(&(th[i]),NULL,&getVolume,NULL);
 
   for (int i=0; i<NUMTHREADS; i++) {
     if (err[i] != 0)
@@ -58,7 +62,7 @@ int main() {
 }
 
 
-///////////////////////////////////// Functions
+////////////////////////////////////// Functions
 
 // print all info
 void *printInfo(void *arg) {
@@ -66,16 +70,35 @@ void *printInfo(void *arg) {
   sleep(1);
   while(1){
     pthread_mutex_lock(&mutex);
-    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d '",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s);
+    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %s'",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol);
     system(output);
     pthread_mutex_unlock(&mutex);
-    usleep(500000);
+    usleep(100000);
   }
   return NULL;
 }
 
+// get the system sound volume using shell script
 void *getVolume(void *arg) {
-  
+  char *volume;
+  FILE *fp;
+
+  while(1) {
+    fp = popen("~/.sh/getVolume.sh","r");
+    if (fp == NULL ){
+      volume="ERROR GETTING VOLUME";
+      break;
+    }
+    else {
+      volume = (char *) malloc(3*sizeof(char));
+      fscanf(fp,"%s",volume);
+      
+      pthread_mutex_lock(&mutex);
+      vol = volume;
+      pthread_mutex_unlock(&mutex);      
+    }
+    usleep(100000);
+  }
 }
 
 // every 250000ns = 0.25s updates date and time variable (datetime.current) and .time

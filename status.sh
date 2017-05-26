@@ -1,157 +1,21 @@
 #!/bin/bash
-
-
-# function Main {
-#     while true
-#     do
-#     	# usim5=$(stocks USIM5 4.62 400)
-#     	weekday=$(WeekDay)
-#     	day=$(Day)
-#     	month=$(Month)
-#     	time=$(Time)
-#     	vol=$(Volume)
-#     	year=$(Year)
-#     	# music=$(GetMusic)
-#     	echo -e "$weekday, $day $month - $year | $time | $usim5 | $vol | $music "
-
-#     done
-# }
+func=$1
 
 function Main {
-    ~/.sh/bash/status.exec
+    if [ "$func" == "" ]
+    then
+	~/.sh/status/bin/status.exec
+    else
+	echo oi
+    fi
 }
 
-function WeekDay() {
-    seg="понедельник"
-    ter="вторник"
-    qua="среда"
-    qui="четверг"
-    sex="пятница"
-    sab="суббота"
-    dom="воскресенье"
-
-    day=$(date +%u)
-
-    case $day in 1)
-		     echo $seg
-		     ;;
-
-		  2)
-		      echo $ter
-		      ;;
-
-		  3)
-		      echo $qua
-		      ;;
-
-		  4)
-		      echo $qui
-		      ;;
-
-		  5)
-		      echo $sex
-		      ;;
-
-		  6)
-		      echo $sab
-		      ;;
-
-		  7)
-		      echo $dom
-		      ;;
-
-    esac
-}
-
-
-function Month(){
-    jan="январь"
-    fev="февраль"
-    mar="март"
-    abr="апрель"
-    mai="май"
-    jun="июнь"
-    jul="июль"
-    ago="август"
-    set="сентябрь"
-    out="октябрь"
-    nov="ноябрь"
-    dez="декабрь"
-
-    month=$(date +%m)
-
-
-    case $month in 01)
-		       echo $jan
-		       ;;
-
-		    02)
-			echo $fev
-			;;
-
-		    03)
-			echo $mar
-			;;
-
-		    04)
-			echo $abr
-			;;
-
-		    05)
-			echo $mai
-			;;
-
-		    06)
-			echo $jun
-			;;
-
-		    07)
-			echo $jul
-			;;
-
-		    08)
-			echo $ago
-			;;
-
-		    09)
-			echo $set
-			;;
-
-		    10)
-			echo $out
-			;;
-
-		    11)
-			echo $nov
-			;;
-
-		    12)
-			echo $dez
-			;;
-
-    esac
-
-}
-
-function Time() {
-    time=$(date +%T)
-    echo $time
-}
 
 function Volume() {
     vol_embrapa=$(amixer get Master |grep "Mono: Playback" |awk '{print $4}'|sed 's/[^0-9\%]//g')
     # vol=$(amixer get Master |grep Left |awk '{print $5}'|sed 's/[^0-9\%]//g')
-    echo ♫: $vol_embrapa
-}
-
-function Day(){
-    day=$(date +%d)
-    echo $day
-}
-
-function Year(){
-    year=$(date +%y)
-    echo 20$year
+    #echo ♫: $vol_embrapa
+    echo $vol_embrapa
 }
 
 function GetMusic() {
@@ -203,4 +67,21 @@ Main
 #     #    status_command i3status | path/to/this/script.sh
 #     # }
 
+# }
+
+
+# function Main {
+#     while true
+#     do
+#     	# usim5=$(stocks USIM5 4.62 400)
+#     	weekday=$(WeekDay)
+#     	day=$(Day)
+#     	month=$(Month)
+#     	time=$(Time)
+#     	vol=$(Volume)
+#     	year=$(Year)
+#     	# music=$(GetMusic)
+#     	echo -e "$weekday, $day $month - $year | $time | $usim5 | $vol | $music "
+
+#     done
 # }
