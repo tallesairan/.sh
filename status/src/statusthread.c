@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#define NUMTHREADS 4
+#define NUMTHREADS 5
 
 // headers
 void *printInfo(void *arg);
@@ -33,6 +33,7 @@ pthread_t th[NUMTHREADS];
 pthread_mutex_t mutex;
 volatile struct tm *current;
 volatile char *vol;
+volatile char *stk;
 
 // main
 
@@ -40,6 +41,8 @@ int main() {
   int err[NUMTHREADS], i=0;
   pthread_mutex_init(&mutex,NULL);
 
+  system("echo inicializando");
+  
   err[i] = pthread_create(&(th[i]),NULL,&printInfo,NULL);
   i++;
   err[i] = pthread_create(&(th[i]),NULL,&updateTime,NULL);
@@ -47,6 +50,8 @@ int main() {
   err[i] = pthread_create(&(th[i]),NULL,&getDate,NULL);
   i++;
   err[i] = pthread_create(&(th[i]),NULL,&getVolume,NULL);
+  i++;
+  err[i] = pthread_create(&(th[i]),NULL,&getStocks,NULL);
 
   for (int i=0; i<NUMTHREADS; i++) {
     if (err[i] != 0)
@@ -67,10 +72,11 @@ int main() {
 // print all info
 void *printInfo(void *arg) {
   char output[100];
+  system("echo inicializando");
   sleep(1);
   while(1){
     pthread_mutex_lock(&mutex);
-    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %s'",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol);
+    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %s' - %s",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol,stk);
     system(output);
     pthread_mutex_unlock(&mutex);
     usleep(100000);
@@ -98,6 +104,29 @@ void *getVolume(void *arg) {
       pthread_mutex_unlock(&mutex);      
     }
     usleep(100000);
+  }
+}
+
+void *getStocks(void *arg){
+  char *stocks;
+  FILE *fp;
+
+  //get stock price using shell script
+  while(1) {
+     fp = popen("~/.sh/status/shell_scripts/stocks.sh usim5","r");
+    if (fp == NULL ){
+      stocks="ERROR GETTING STOCKS";
+      break;
+    }
+    else {
+      stocks = (char *) malloc(30*sizeof(char));
+      fscanf(fp,"%s",stocks);
+      
+      pthread_mutex_lock(&mutex);
+      stk = stocks;
+      pthread_mutex_unlock(&mutex);      
+    }
+    sleep(5);
   }
 }
 
