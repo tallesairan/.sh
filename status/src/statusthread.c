@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#define NUMTHREADS 5
+#define NUMTHREADS 4
 
 // headers
 void *printInfo(void *arg);
@@ -40,6 +40,7 @@ volatile char *stk;
 int main() {
   int err[NUMTHREADS], i=0;
   pthread_mutex_init(&mutex,NULL);
+  vol = (char *) malloc(3*sizeof(char));
 
   system("echo inicializando");
   
@@ -50,8 +51,8 @@ int main() {
   err[i] = pthread_create(&(th[i]),NULL,&getDate,NULL);
   i++;
   err[i] = pthread_create(&(th[i]),NULL,&getVolume,NULL);
-  i++;
-  err[i] = pthread_create(&(th[i]),NULL,&getStocks,NULL);
+  /* i++; */
+  /* err[i] = pthread_create(&(th[i]),NULL,&getStocks,NULL); */
 
   for (int i=0; i<NUMTHREADS; i++) {
     if (err[i] != 0)
@@ -62,6 +63,7 @@ int main() {
 
   for(int i=0; i<NUMTHREADS; i++)
     (void) pthread_join(th[i],NULL);
+
 
   return 0;
 }
@@ -75,42 +77,48 @@ void *printInfo(void *arg) {
   sleep(1);
   while(1){
     pthread_mutex_lock(&mutex);
-    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %s' - %s",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol,stk);
+    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %s' ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol);
     system(output);
     pthread_mutex_unlock(&mutex);
-    usleep(100000);
+    usleep(200000);
   }
   return NULL;
 }
 
 // get the system sound volume using shell script
 void *getVolume(void *arg) {
-  char *volume;
-  FILE *fp;
+  char *volume = NULL;
+  FILE *fp = NULL;
 
   while(1) {
     fp = popen("~/.sh/status/shell_scripts/getVolume.sh","r");
+    volume = (char *) malloc(3*sizeof(char));
     if (fp == NULL ){
-      volume="ERROR GETTING VOLUME";
-      break;
-    }
-    else {
-      volume = (char *) malloc(3*sizeof(char));
-      fscanf(fp,"%s",volume);
+      volume="ERR";
       
       pthread_mutex_lock(&mutex);
-      vol = volume;
-      pthread_mutex_unlock(&mutex);      
+      strcpy(vol,volume);
+      pthread_mutex_unlock(&mutex);
+      
     }
+    else {
+      fscanf(fp,"%s",volume);
+	    
+      pthread_mutex_lock(&mutex);
+      strcpy(vol,volume);
+      pthread_mutex_unlock(&mutex);
+    }
+    free(fp);
+    fp = NULL;
     usleep(100000);
   }
 }
 
+//get stock price using shell script
 void *getStocks(void *arg){
   char *stocks;
   FILE *fp;
 
-  //get stock price using shell script
   while(1) {
      fp = popen("~/.sh/status/shell_scripts/stocks.sh bees3","r");
     if (fp == NULL ){
