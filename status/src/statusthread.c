@@ -32,7 +32,7 @@ volatile DateTime datetime;
 pthread_t th[NUMTHREADS];
 pthread_mutex_t mutex;
 volatile struct tm *current;
-volatile char *vol;
+volatile int vol;
 volatile char *stk;
 
 // main
@@ -43,35 +43,27 @@ int main() {
 
   system("echo inicializando");
   
-  /* err[i] = pthread_create(&(th[i]),NULL,&printInfo,NULL); */
+  err[i] = pthread_create(&(th[i]),NULL,&printInfo,NULL);
+  i++;
+  err[i] = pthread_create(&(th[i]),NULL,&updateTime,NULL);
+  i++;
+  err[i] = pthread_create(&(th[i]),NULL,&getDate,NULL);
+  i++;
+  err[i] = pthread_create(&(th[i]),NULL,&getVolume,NULL);
   /* i++; */
-  /* err[i] = pthread_create(&(th[i]),NULL,&updateTime,NULL); */
-  /* i++; */
-  /* err[i] = pthread_create(&(th[i]),NULL,&getDate,NULL); */
-  /* i++; */
-  /* err[i] = pthread_create(&(th[i]),NULL,&getVolume,NULL); */
-  /* /\* i++; *\/ */
-  /* /\* err[i] = pthread_create(&(th[i]),NULL,&getStocks,NULL); *\/ */
+  /* err[i] = pthread_create(&(th[i]),NULL,&getStocks,NULL); */
 
-  /* for (int i=0; i<NUMTHREADS; i++) { */
-  /*   if (err[i] != 0) */
-  /*     printf("\ncan't create thread :[%s]", strerror(err[i])); */
-  /*   else */
-  /*     printf("\n Thread %d created successfully\n",i); */
-  /* } */
+  for (int i=0; i<NUMTHREADS; i++) {
+    if (err[i] != 0)
+      printf("\ncan't create thread :[%s]", strerror(err[i]));
+    else
+      printf("\n Thread %d created successfully\n",i);
+  }
 
-  /* for(int i=0; i<NUMTHREADS; i++) */
-  /*   (void) pthread_join(th[i],NULL); */
-  char *volume = (char *) malloc(3*sizeof(char));
-  FILE *fp = NULL;
+  for(int i=0; i<NUMTHREADS; i++)
+    (void) pthread_join(th[i],NULL);
 
-    while(1) {
-      fp = popen("~/.sh/status/shell_scripts/getVolume.sh","r");
 
-      printf("%s\n", fp);
-      printf("%d\n",i);
-      i++;
-    }
   return 0;
 }
 
@@ -84,7 +76,7 @@ void *printInfo(void *arg) {
   sleep(1);
   while(1){
     pthread_mutex_lock(&mutex);
-    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %s' ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol);
+    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %d%%' ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol);
     system(output);
     pthread_mutex_unlock(&mutex);
     usleep(200000);
@@ -94,26 +86,22 @@ void *printInfo(void *arg) {
 
 // get the system sound volume using shell script
 void *getVolume(void *arg) {
-  char *volume = (char *) malloc(3*sizeof(char));
+  int volume;
   FILE *fp = NULL;
 
   while(1) {
+    volume = -1;
     fp = popen("~/.sh/status/shell_scripts/getVolume.sh","r");
 
-    if (fp == NULL ){
-      volume="ERR";
+    if (fp != NULL ){
+      fscanf(fp,"%d",&volume);
     }
-    else {
-      fscanf(fp,"%s",volume);
-    }
-	    
+    pclose(fp);
+    
     pthread_mutex_lock(&mutex);
     vol = volume;
-    printf("%s\n",vol);
     pthread_mutex_unlock(&mutex);
 
-    free(fp);
-    fp = NULL;
     usleep(100000);
   }
 }

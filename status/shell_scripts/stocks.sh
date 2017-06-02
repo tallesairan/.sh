@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# https://www.itaucorretora.com.br/Finder/Finder/?stock=BEES3
 
 stock=$1
 buyin=$2
@@ -10,7 +11,7 @@ function Main(){
     then
 	echo " "
     else
-	paragraph=$(w3m -no-cookie "https://www.google.com.br/search?q=$stock.SA" |grep "Brasil ");
+	paragraph=$(w3m -no-cookie "https://www.google.com.br/search?q=$stock" |grep "Brasil ");
 	
 	a=( ${paragraph} )
 
