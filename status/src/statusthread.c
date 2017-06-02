@@ -20,7 +20,7 @@ char *dayrussian(int num);
 
 // structures
 typedef struct{
-  char *day;
+  char *day; 
   char *weekday;
   char *month;
   int h,m,s,y;
@@ -40,31 +40,38 @@ volatile char *stk;
 int main() {
   int err[NUMTHREADS], i=0;
   pthread_mutex_init(&mutex,NULL);
-  vol = (char *) malloc(3*sizeof(char));
 
   system("echo inicializando");
   
-  err[i] = pthread_create(&(th[i]),NULL,&printInfo,NULL);
-  i++;
-  err[i] = pthread_create(&(th[i]),NULL,&updateTime,NULL);
-  i++;
-  err[i] = pthread_create(&(th[i]),NULL,&getDate,NULL);
-  i++;
-  err[i] = pthread_create(&(th[i]),NULL,&getVolume,NULL);
+  /* err[i] = pthread_create(&(th[i]),NULL,&printInfo,NULL); */
   /* i++; */
-  /* err[i] = pthread_create(&(th[i]),NULL,&getStocks,NULL); */
+  /* err[i] = pthread_create(&(th[i]),NULL,&updateTime,NULL); */
+  /* i++; */
+  /* err[i] = pthread_create(&(th[i]),NULL,&getDate,NULL); */
+  /* i++; */
+  /* err[i] = pthread_create(&(th[i]),NULL,&getVolume,NULL); */
+  /* /\* i++; *\/ */
+  /* /\* err[i] = pthread_create(&(th[i]),NULL,&getStocks,NULL); *\/ */
 
-  for (int i=0; i<NUMTHREADS; i++) {
-    if (err[i] != 0)
-      printf("\ncan't create thread :[%s]", strerror(err[i]));
-    else
-      printf("\n Thread %d created successfully\n",i);
-  }
+  /* for (int i=0; i<NUMTHREADS; i++) { */
+  /*   if (err[i] != 0) */
+  /*     printf("\ncan't create thread :[%s]", strerror(err[i])); */
+  /*   else */
+  /*     printf("\n Thread %d created successfully\n",i); */
+  /* } */
 
-  for(int i=0; i<NUMTHREADS; i++)
-    (void) pthread_join(th[i],NULL);
+  /* for(int i=0; i<NUMTHREADS; i++) */
+  /*   (void) pthread_join(th[i],NULL); */
+  char *volume = (char *) malloc(3*sizeof(char));
+  FILE *fp = NULL;
 
+    while(1) {
+      fp = popen("~/.sh/status/shell_scripts/getVolume.sh","r");
 
+      printf("%s\n", fp);
+      printf("%d\n",i);
+      i++;
+    }
   return 0;
 }
 
@@ -87,27 +94,24 @@ void *printInfo(void *arg) {
 
 // get the system sound volume using shell script
 void *getVolume(void *arg) {
-  char *volume = NULL;
+  char *volume = (char *) malloc(3*sizeof(char));
   FILE *fp = NULL;
 
   while(1) {
     fp = popen("~/.sh/status/shell_scripts/getVolume.sh","r");
-    volume = (char *) malloc(3*sizeof(char));
+
     if (fp == NULL ){
       volume="ERR";
-      
-      pthread_mutex_lock(&mutex);
-      strcpy(vol,volume);
-      pthread_mutex_unlock(&mutex);
-      
     }
     else {
       fscanf(fp,"%s",volume);
-	    
-      pthread_mutex_lock(&mutex);
-      strcpy(vol,volume);
-      pthread_mutex_unlock(&mutex);
     }
+	    
+    pthread_mutex_lock(&mutex);
+    vol = volume;
+    printf("%s\n",vol);
+    pthread_mutex_unlock(&mutex);
+
     free(fp);
     fp = NULL;
     usleep(100000);
