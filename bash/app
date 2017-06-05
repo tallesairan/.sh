@@ -1,0 +1,4 @@
+#!/bin/sh
+#!/bin/bash
+
+open /Applications/$1.app $2 $3 $4 $5

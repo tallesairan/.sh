@@ -5,7 +5,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#define NUMTHREADS 4
+#define NUMTHREADS 5
+#define STOCK_QTTY 600
+#define STOCK_VALUE 3.47
 
 // headers
 void *printInfo(void *arg);
@@ -26,6 +28,11 @@ typedef struct{
   int h,m,s,y;
 } DateTime;
 
+typedef struct {
+  char *status;
+  float var, perc, atual, lucro, full_perc;
+} Stock;
+
 // global variables
 
 volatile DateTime datetime;
@@ -33,7 +40,8 @@ pthread_t th[NUMTHREADS];
 pthread_mutex_t mutex;
 volatile struct tm *current;
 volatile int vol;
-volatile char *stk;
+volatile char *stk = NULL;
+volatile Stock stocks;
 
 // main
 
@@ -50,8 +58,8 @@ int main() {
   err[i] = pthread_create(&(th[i]),NULL,&getDate,NULL);
   i++;
   err[i] = pthread_create(&(th[i]),NULL,&getVolume,NULL);
-  /* i++; */
-  /* err[i] = pthread_create(&(th[i]),NULL,&getStocks,NULL); */
+  i++;
+  err[i] = pthread_create(&(th[i]),NULL,&getStocks,NULL);
 
   for (int i=0; i<NUMTHREADS; i++) {
     if (err[i] != 0)
@@ -64,6 +72,9 @@ int main() {
     (void) pthread_join(th[i],NULL);
 
 
+
+
+
   return 0;
 }
 
@@ -72,11 +83,11 @@ int main() {
 
 // print all info
 void *printInfo(void *arg) {
-  char output[100];
+  char output[200];
   sleep(1);
   while(1){
     pthread_mutex_lock(&mutex);
-    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %d%%' ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol);
+    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %d%% - BEES3: %s %.2f %.2f (%.2f%%) ∵ R$ %.2f (%.2f%%)' ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol,stocks.status,stocks.atual,stocks.var,stocks.perc, stocks.lucro, stocks.full_perc);
     system(output);
     pthread_mutex_unlock(&mutex);
     usleep(200000);
@@ -108,24 +119,46 @@ void *getVolume(void *arg) {
 
 //get stock price using shell script
 void *getStocks(void *arg){
-  char *stocks;
+  char status[10], output[100], *aux="Carregando";
+  float var, perc, atual, inicial, lucro,full_perc;
   FILE *fp;
 
+  inicial = STOCK_QTTY * STOCK_VALUE;
+
+  pthread_mutex_lock(&mutex);
+  stocks.var = 0;
+  stocks.perc = 0;
+  stocks.atual = 0;
+  stocks.full_perc = 0;
+  stocks.status = aux;
+  stocks.lucro = 0;
+  pthread_mutex_unlock(&mutex);
+
+  
   while(1) {
-     fp = popen("~/.sh/status/shell_scripts/stocks.sh bees3","r");
-    if (fp == NULL ){
-      stocks="ERROR GETTING STOCKS";
-      break;
+
+    fp = popen("~/.sh/status/shell_scripts/stocks.sh bees3","r");
+
+    if (fp != NULL ){
+      fscanf(fp,"%s",status);
+      fscanf(fp,"%f",&var);
+      fscanf(fp,"%f",&perc);
+      fscanf(fp,"%f",&atual);
+
+      lucro = atual*STOCK_QTTY - inicial;
+      full_perc = 100*lucro/inicial;
     }
-    else {
-      stocks = (char *) malloc(30*sizeof(char));
-      fscanf(fp,"%s",stocks);
-      
-      pthread_mutex_lock(&mutex);
-      stk = stocks;
-      pthread_mutex_unlock(&mutex);      
-    }
+
     sleep(5);
+    pthread_mutex_lock(&mutex);
+    stocks.var = var;
+    stocks.perc = perc;
+    stocks.atual = atual;
+    stocks.full_perc = full_perc;
+    stocks.status = status;
+    stocks.lucro = lucro;
+    pthread_mutex_unlock(&mutex);
+
   }
 }
 

@@ -1,40 +1,24 @@
 #!/bin/bash
 
-# https://www.itaucorretora.com.br/Finder/Finder/?stock=BEES3
-
 stock=$1
-buyin=$2
-qtdde=$3
 
 function Main(){
-    if [ "$stock" == "" ];
+     if [ "$stock" == "" ];
     then
-	echo " "
+    	echo "error"
     else
-	paragraph=$(w3m -no-cookie "https://www.google.com.br/search?q=$stock" |grep "Brasil ");
+	paragraph=$(w3m "http://cotacoes.economia.uol.com.br/acao/index.html?codigo=$stock.SA" |grep Horário -A 2)
+	paragraph=$(echo $paragraph | tr , .)
+	word=( ${paragraph} )
 	
-	a=( ${paragraph} )
-
-	preco=${a[1]}
-	variacao=( ${a[2]})
-	porcentagem=( ${a[3]})
-
-	echo $preco ${variacao[0]} ${variacao[1]} ${porcentagem[0]}
-	# value=${a[0]}
-	# status=${a[1]}
-	# perct=${a[2]}
-
-	# if [ "$buyin" == " " ] || [ "$qtdde" == " " ];
-	# then
-	#     echo $stock: $value $status $perct
-	# else
-	#     gain=$(bc -l <<< "$qtdde*($value-$buyin)")
-	#     totalBuyed=$(bc -l <<< "$qtdde*$buyin")
-	#     perc=$(bc -l <<< "scale=2; 100*($totalBuyed+$gain)/$totalBuyed-100")
-	#     echo "$stock: $value $status $perct ¤ $gain ($perc%) "
-	# fi
-    fi
-    
+	status=${word[9]}
+	var=${word[11]}
+	perc=${word[12]}
+	atual=${word[13]}
+	echo $status $var $perc $atual
+	fi
 }
 
 Main
+
+#echo baixa -0.08 -2.50 3.12
