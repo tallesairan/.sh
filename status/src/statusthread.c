@@ -40,7 +40,6 @@ pthread_t th[NUMTHREADS];
 pthread_mutex_t mutex;
 volatile struct tm *current;
 volatile int vol;
-volatile char *stk = NULL;
 volatile Stock stocks;
 
 // main
@@ -50,6 +49,11 @@ int main() {
   pthread_mutex_init(&mutex,NULL);
 
   system("echo inicializando");
+
+  datetime.day = "";
+  datetime.weekday = "";
+  datetime.month = "";
+  datetime.h = datetime.m = datetime.s = datetime.y = 0;
   
   err[i] = pthread_create(&(th[i]),NULL,&printInfo,NULL);
   i++;
@@ -122,6 +126,7 @@ void *getStocks(void *arg){
   char status[10], output[100], *aux="Carregando";
   float var, perc, atual, inicial, lucro,full_perc;
   FILE *fp;
+  int hour;
 
   inicial = STOCK_QTTY * STOCK_VALUE;
 
@@ -134,8 +139,34 @@ void *getStocks(void *arg){
   stocks.lucro = 0;
   pthread_mutex_unlock(&mutex);
 
+  fp = popen("~/.sh/status/shell_scripts/stocks.sh bees3","r");
+
+  if (fp != NULL ){
+    fscanf(fp,"%s",status);
+    fscanf(fp,"%f",&var);
+    fscanf(fp,"%f",&perc);
+    fscanf(fp,"%f",&atual);
+
+    lucro = atual*STOCK_QTTY - inicial;
+    full_perc = 100*lucro/inicial;
+  }
+
+  pthread_mutex_lock(&mutex);
+  stocks.var = var;
+  stocks.perc = perc;
+  stocks.atual = atual;
+  stocks.full_perc = full_perc;
+  stocks.status = status;
+  stocks.lucro = lucro;
+  pthread_mutex_unlock(&mutex);
+
+  sleep(30);
   
-  while(1) {
+  while (1) {
+    pthread_mutex_lock(&mutex);
+    hour = datetime.h;
+    pthread_mutex_unlock(&mutex);
+
 
     fp = popen("~/.sh/status/shell_scripts/stocks.sh bees3","r");
 
@@ -149,7 +180,6 @@ void *getStocks(void *arg){
       full_perc = 100*lucro/inicial;
     }
 
-    sleep(5);
     pthread_mutex_lock(&mutex);
     stocks.var = var;
     stocks.perc = perc;
@@ -159,7 +189,8 @@ void *getStocks(void *arg){
     stocks.lucro = lucro;
     pthread_mutex_unlock(&mutex);
 
-  }
+    sleep(30);
+  } 
 }
 
 // every 250000ns = 0.25s updates date and time variable (datetime.current) and .time
