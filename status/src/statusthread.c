@@ -50,11 +50,13 @@ int main() {
 
   system("echo inicializando");
 
+  pthread_mutex_lock(&mutex);
   datetime.day = "";
   datetime.weekday = "";
   datetime.month = "";
   datetime.h = datetime.m = datetime.s = datetime.y = 0;
-  
+  pthread_mutex_unlock(&mutex);
+    
   err[i] = pthread_create(&(th[i]),NULL,&printInfo,NULL);
   i++;
   err[i] = pthread_create(&(th[i]),NULL,&updateTime,NULL);
@@ -88,7 +90,7 @@ int main() {
 // print all info
 void *printInfo(void *arg) {
   char output[200];
-  sleep(1);
+  sleep(2);
   while(1){
     pthread_mutex_lock(&mutex);
     sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %d%% - BEES3: %s %.2f %.2f (%.2f%%) ∵ R$ %.2f (%.2f%%)' ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol,stocks.status,stocks.atual,stocks.var,stocks.perc, stocks.lucro, stocks.full_perc);
@@ -167,28 +169,35 @@ void *getStocks(void *arg){
     hour = datetime.h;
     pthread_mutex_unlock(&mutex);
 
+    if(hour >= 10 && hour <= 18) {
 
-    fp = popen("~/.sh/status/shell_scripts/stocks.sh bees3","r");
+      fp = popen("~/.sh/status/shell_scripts/stocks.sh bees3","r");
 
-    if (fp != NULL ){
-      fscanf(fp,"%s",status);
-      fscanf(fp,"%f",&var);
-      fscanf(fp,"%f",&perc);
-      fscanf(fp,"%f",&atual);
+      if (fp != NULL ){
+	fscanf(fp,"%s",status);
+	fscanf(fp,"%f",&var);
+	fscanf(fp,"%f",&perc);
+	fscanf(fp,"%f",&atual);
 
-      lucro = atual*STOCK_QTTY - inicial;
-      full_perc = 100*lucro/inicial;
+	lucro = atual*STOCK_QTTY - inicial;
+	full_perc = 100*lucro/inicial;
+      }
+
+      pthread_mutex_lock(&mutex);
+      stocks.var = var;
+      stocks.perc = perc;
+      stocks.atual = atual;
+      stocks.full_perc = full_perc;
+      stocks.status = status;
+      stocks.lucro = lucro;
+      pthread_mutex_unlock(&mutex);
     }
-
-    pthread_mutex_lock(&mutex);
-    stocks.var = var;
-    stocks.perc = perc;
-    stocks.atual = atual;
-    stocks.full_perc = full_perc;
-    stocks.status = status;
-    stocks.lucro = lucro;
-    pthread_mutex_unlock(&mutex);
-
+    else {
+      pthread_mutex_lock(&mutex);
+      strcpy(status,"fechado");
+      stocks.status = status;
+      pthread_mutex_unlock(&mutex);
+    }
     sleep(30);
   } 
 }

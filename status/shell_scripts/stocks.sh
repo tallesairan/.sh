@@ -13,6 +13,10 @@ function Main(){
 	
 	status=${word[9]}
 	var=${word[11]}
+	if [ "$var" == "0.00" ]
+	then
+	    status="estável"
+	fi
 	perc=${word[12]}
 	atual=${word[13]}
 	echo $status $var $perc $atual
