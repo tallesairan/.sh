@@ -5,9 +5,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#define NUMTHREADS 5
+#define NUMTHREADS 6
 #define STOCK_QTTY 600
 #define STOCK_VALUE 3.47
+#define STOCK_QTTY2 0
+#define STOCK_VALUE2 0
 
 // headers
 void *printInfo(void *arg);
@@ -15,6 +17,7 @@ void *getDate(void *arg);
 void *getStocks(void *arg);
 void *updateTime(void *arg);
 void *getVolume(void *arg);
+void *getStocks2(void *arg);
 
 char *weekrussian(int num);
 char *monthrussian(int num);
@@ -41,6 +44,7 @@ pthread_mutex_t mutex;
 volatile struct tm *current;
 volatile int vol;
 volatile Stock stocks;
+volatile Stock stocks2;
 
 // main
 
@@ -66,6 +70,8 @@ int main() {
   err[i] = pthread_create(&(th[i]),NULL,&getVolume,NULL);
   i++;
   err[i] = pthread_create(&(th[i]),NULL,&getStocks,NULL);
+  i++;
+  err[i] = pthread_create(&(th[i]),NULL,&getStocks2,NULL);
 
   for (int i=0; i<NUMTHREADS; i++) {
     if (err[i] != 0)
@@ -89,11 +95,11 @@ int main() {
 
 // print all info
 void *printInfo(void *arg) {
-  char output[200];
+  char output[250];
   sleep(2);
   while(1){
     pthread_mutex_lock(&mutex);
-    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %d%% - BEES3: %s %.2f %.2f (%.2f%%) ∵ R$ %.2f (%.2f%%)' ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol,stocks.status,stocks.atual,stocks.var,stocks.perc, stocks.lucro, stocks.full_perc);
+    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %d%% - BEES3: %s %.2f %.2f (%.2f%%) ∵ R$ %.2f (%.2f%%) - USIM5: %s %.2f %.2f (%.2f%%) ∵ R$ %.2f (%.2f%%)' ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol,stocks.status,stocks.atual,stocks.var,stocks.perc, stocks.lucro, stocks.full_perc,stocks2.status,stocks2.atual,stocks2.var,stocks2.perc, stocks2.lucro, stocks2.full_perc);
     system(output);
     pthread_mutex_unlock(&mutex);
     usleep(200000);
@@ -150,7 +156,10 @@ void *getStocks(void *arg){
     fscanf(fp,"%f",&atual);
 
     lucro = atual*STOCK_QTTY - inicial;
-    full_perc = 100*lucro/inicial;
+    if(inicial != 0)
+      full_perc = 100*lucro/inicial;
+    else
+      full_perc = 0;
   }
 
   pthread_mutex_lock(&mutex);
@@ -180,7 +189,10 @@ void *getStocks(void *arg){
 	fscanf(fp,"%f",&atual);
 
 	lucro = atual*STOCK_QTTY - inicial;
-	full_perc = 100*lucro/inicial;
+	if(inicial != 0)
+	  full_perc = 100*lucro/inicial;
+	else
+	  full_perc = 0;
       }
 
       pthread_mutex_lock(&mutex);
@@ -201,6 +213,91 @@ void *getStocks(void *arg){
     sleep(30);
   } 
 }
+
+void *getStocks2(void *arg){
+  char status[10], output[100], *aux="Carregando";
+  float var, perc, atual, inicial, lucro,full_perc;
+  FILE *fp;
+  int hour;
+
+  inicial = STOCK_QTTY2 * STOCK_VALUE2;
+
+  pthread_mutex_lock(&mutex);
+  stocks2.var = 0;
+  stocks2.perc = 0;
+  stocks2.atual = 0;
+  stocks2.full_perc = 0;
+  stocks2.status = aux;
+  stocks2.lucro = 0;
+  pthread_mutex_unlock(&mutex);
+
+  fp = popen("~/.sh/status/shell_scripts/stocks2.sh usim5","r");
+
+  if (fp != NULL ){
+    fscanf(fp,"%s",status);
+    fscanf(fp,"%f",&var);
+    fscanf(fp,"%f",&perc);
+    fscanf(fp,"%f",&atual);
+
+    lucro = atual*STOCK_QTTY2 - inicial;
+    if(inicial != 0)
+      full_perc = 100*lucro/inicial;
+    else
+      full_perc = 0;
+  }
+
+  pthread_mutex_lock(&mutex);
+  stocks2.var = var;
+  stocks2.perc = perc;
+  stocks2.atual = atual;
+  stocks2.full_perc = full_perc;
+  stocks2.status = status;
+  stocks2.lucro = lucro;
+  pthread_mutex_unlock(&mutex);
+
+  sleep(30);
+  
+  while (1) {
+    pthread_mutex_lock(&mutex);
+    hour = datetime.h;
+    pthread_mutex_unlock(&mutex);
+
+    if(hour >= 10 && hour <= 18) {
+
+      fp = popen("~/.sh/status/shell_scripts/stocks2.sh usim5","r");
+
+      if (fp != NULL ){
+	fscanf(fp,"%s",status);
+	fscanf(fp,"%f",&var);
+	fscanf(fp,"%f",&perc);
+	fscanf(fp,"%f",&atual);
+
+	lucro = atual*STOCK_QTTY2 - inicial;
+	if(inicial != 0)
+	  full_perc = 100*lucro/inicial;
+	else
+	  full_perc = 0;
+      }
+
+      pthread_mutex_lock(&mutex);
+      stocks2.var = var;
+      stocks2.perc = perc;
+      stocks2.atual = atual;
+      stocks2.full_perc = full_perc;
+      stocks2.status = status;
+      stocks2.lucro = lucro;
+      pthread_mutex_unlock(&mutex);
+    }
+    else {
+      pthread_mutex_lock(&mutex);
+      strcpy(status,"fechado");
+      stocks2.status = status;
+      pthread_mutex_unlock(&mutex);
+    }
+    sleep(30);
+  } 
+}
+
 
 // every 250000ns = 0.25s updates date and time variable (datetime.current) and .time
 void *updateTime(void *arg){
