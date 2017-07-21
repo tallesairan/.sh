@@ -8,8 +8,8 @@
 #define NUMTHREADS 6
 #define STOCK_QTTY 600
 #define STOCK_VALUE 3.47
-#define STOCK_QTTY2 0
-#define STOCK_VALUE2 0
+#define STOCK_QTTY2 400
+#define STOCK_VALUE2 5.07
 
 // headers
 void *printInfo(void *arg);
@@ -45,6 +45,7 @@ volatile struct tm *current;
 volatile int vol;
 volatile Stock stocks;
 volatile Stock stocks2;
+volatile float total;
 
 // main
 
@@ -54,6 +55,8 @@ int main() {
 
   system("echo inicializando");
 
+  total = 0;
+  
   pthread_mutex_lock(&mutex);
   datetime.day = "";
   datetime.weekday = "";
@@ -99,7 +102,7 @@ void *printInfo(void *arg) {
   sleep(2);
   while(1){
     pthread_mutex_lock(&mutex);
-    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %d%% - BEES3: %s %.2f %.2f (%.2f%%) ∵ R$ %.2f (%.2f%%) - USIM5: %s %.2f %.2f (%.2f%%) ∵ R$ %.2f (%.2f%%)' ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol,stocks.status,stocks.atual,stocks.var,stocks.perc, stocks.lucro, stocks.full_perc,stocks2.status,stocks2.atual,stocks2.var,stocks2.perc, stocks2.lucro, stocks2.full_perc);
+    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %d%% - BEES3: %s %.2f %.2f (%.2f%%) ∵ R$ %.2f (%.2f%%) - USIM5: %s %.2f %.2f (%.2f%%) ∵ R$ %.2f (%.2f%%) ₢ total: %.2f' ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol,stocks.status,stocks.atual,stocks.var,stocks.perc, stocks.lucro, stocks.full_perc,stocks2.status,stocks2.atual,stocks2.var,stocks2.perc, stocks2.lucro, stocks2.full_perc, total);
     system(output);
     pthread_mutex_unlock(&mutex);
     usleep(200000);
@@ -145,6 +148,7 @@ void *getStocks(void *arg){
   stocks.full_perc = 0;
   stocks.status = aux;
   stocks.lucro = 0;
+  total = stocks.lucro + stocks2.lucro;
   pthread_mutex_unlock(&mutex);
 
   fp = popen("~/.sh/status/shell_scripts/stocks.sh bees3","r");
@@ -169,6 +173,7 @@ void *getStocks(void *arg){
   stocks.full_perc = full_perc;
   stocks.status = status;
   stocks.lucro = lucro;
+  total = stocks.lucro + stocks2.lucro;
   pthread_mutex_unlock(&mutex);
 
   sleep(30);
@@ -202,6 +207,7 @@ void *getStocks(void *arg){
       stocks.full_perc = full_perc;
       stocks.status = status;
       stocks.lucro = lucro;
+      total = stocks.lucro + stocks2.lucro;
       pthread_mutex_unlock(&mutex);
     }
     else {
@@ -229,6 +235,7 @@ void *getStocks2(void *arg){
   stocks2.full_perc = 0;
   stocks2.status = aux;
   stocks2.lucro = 0;
+  total = stocks.lucro + stocks2.lucro;
   pthread_mutex_unlock(&mutex);
 
   fp = popen("~/.sh/status/shell_scripts/stocks2.sh usim5","r");
@@ -253,6 +260,7 @@ void *getStocks2(void *arg){
   stocks2.full_perc = full_perc;
   stocks2.status = status;
   stocks2.lucro = lucro;
+  total = stocks.lucro + stocks2.lucro;
   pthread_mutex_unlock(&mutex);
 
   sleep(30);
@@ -286,6 +294,7 @@ void *getStocks2(void *arg){
       stocks2.full_perc = full_perc;
       stocks2.status = status;
       stocks2.lucro = lucro;
+      total = stocks.lucro + stocks2.lucro;
       pthread_mutex_unlock(&mutex);
     }
     else {
