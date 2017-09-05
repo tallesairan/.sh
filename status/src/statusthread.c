@@ -7,7 +7,7 @@
 
 #define NUMTHREADS 5
 #define STOCK_QTTY 600
-#define STOCK_VALUE 7.96
+#define STOCK_VALUE 8.25
 #define STOCK_QTTY2 0
 #define STOCK_VALUE2 0
 
