@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#define NUMTHREADS 5
+#define NUMTHREADS 6
 #define STOCK_QTTY 600
 #define STOCK_VALUE 10.13
 #define STOCK_QTTY2 0
@@ -17,6 +17,7 @@ void *getDate(void *arg);
 void *getStocks(void *arg);
 void *updateTime(void *arg);
 void *getVolume(void *arg);
+void *getMemory(void *arg);
 void *getStocks2(void *arg);
 
 char *weekrussian(int num);
@@ -46,6 +47,7 @@ volatile int vol;
 volatile Stock stocks;
 volatile Stock stocks2;
 volatile float total;
+volatile char *memory;
 
 // main
 
@@ -73,6 +75,8 @@ int main() {
   err[i] = pthread_create(&(th[i]),NULL,&getVolume,NULL);
   i++;
   err[i] = pthread_create(&(th[i]),NULL,&getStocks,NULL);
+  i++;
+  err[i] = pthread_create(&(th[i]),NULL,&getMemory,NULL);
   /* i++; */
   /* err[i] = pthread_create(&(th[i]),NULL,&getStocks2,NULL); */
 
@@ -106,7 +110,7 @@ void *printInfo(void *arg) {
     /* sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %d%% - BEES3: %s %.2f %.2f (%.2f%%) ∵ R$ %.2f (%.2f%%) - USIM5: %s %.2f %.2f (%.2f%%) ∵ R$ %.2f (%.2f%%) ₢ total: %.2f' ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol,stocks.status,stocks.atual,stocks.var,stocks.perc, stocks.lucro, stocks.full_perc,stocks2.status,stocks2.atual,stocks2.var,stocks2.perc, stocks2.lucro, stocks2.full_perc, total); */
 
     // print com uma thread de stock
-    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %d%% - USIM5: %s %.2f %.2f (%.2f%%) ∵ R$ %.2f (%.2f%%) ' ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol,stocks.status,stocks.atual,stocks.var,stocks.perc, stocks.lucro, stocks.full_perc);
+    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %d%% - USIM5: %s %.2f %.2f (%.2f%%)  ∵ R$ %.2f (%.2f%%) '∵ %s ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol,stocks.status,stocks.atual,stocks.var,stocks.perc, stocks.lucro, stocks.full_perc, memory);
     
     system(output);
     pthread_mutex_unlock(&mutex);
@@ -136,6 +140,26 @@ void *getVolume(void *arg) {
     usleep(100000);
   }
 }
+
+void *getMemory(void *arg) {
+  char mem[30];
+  FILE *fp = NULL;
+
+  while(1) {
+    fp = popen("~/.sh/status/shell_scripts/memory.sh","r");
+
+    if (fp != NULL ){
+      fgets(mem,30,fp);
+    }
+    pclose(fp);
+    pthread_mutex_lock(&mutex);
+    memory = mem;
+    pthread_mutex_unlock(&mutex);
+    sleep(1);
+  }
+}
+
+
 
 //get stock price using shell script
 void *getStocks(void *arg){
