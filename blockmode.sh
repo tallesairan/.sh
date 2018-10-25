@@ -32,7 +32,6 @@ function verifyPsswd {
 
 function block {
     i3-msg bar mode invisible
-    #i3-msg workspace block
     i3-msg mode block
 }
 
