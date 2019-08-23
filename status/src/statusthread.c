@@ -41,14 +41,14 @@ typedef struct {
 pthread_t th[NUMTHREADS];
 pthread_mutex_t mutex;
 volatile struct tm *current;
-volatile char *vol;
+volatile char *vol = "";
 volatile Stock stocks;
 volatile Stock stocks2;
 volatile float total;
-volatile char *memory;
-volatile char *battery;
-volatile char *time_now;
-volatile char *date;
+volatile char *memory = "";
+volatile char *battery = "";
+volatile char *time_now = "";
+volatile char *date = "";
 
 // main
 
@@ -96,7 +96,7 @@ int main() {
 // print all info
 void *printInfo(void *arg) {
   char output[270];
-  sleep(2);
+  sleep(4);
   while(1){
     pthread_mutex_lock(&mutex);
 
@@ -131,7 +131,10 @@ void *getBattery(void *arg) {
     
     fclose(f_actual);
     fclose(f_total);
-
+    fclose(f_status);
+    f_actual = NULL;
+    f_total = NULL;
+    f_status=NULL;
     
     pthread_mutex_lock(&mutex);
     battery = phrase;
@@ -157,7 +160,7 @@ void *getVolume(void *arg) {
       sprintf(phrase, "♫: %d%%", volume);
     }
     pclose(fp);
-    
+    fp = NULL;
     pthread_mutex_lock(&mutex);
     vol = phrase;
     pthread_mutex_unlock(&mutex);
@@ -177,6 +180,7 @@ void *getMemory(void *arg) {
       fgets(mem,30,fp);
     }
     pclose(fp);
+    fp = NULL;
     pthread_mutex_lock(&mutex);
     memory = mem;
     pthread_mutex_unlock(&mutex);
@@ -184,10 +188,23 @@ void *getMemory(void *arg) {
   }
 }
 
-
+void *getStocks(void *arg) {
+  /* FILE *fp = NULL; */
+  /* char text[100]; */
+  /* float value, variation, percentage; */
+  /* while(1){ */
+  /*   fp = popen('w3m "https://finance.yahoo.com/quote/USIM5.SA" |grep BRL -A 2',"r"); */
+  /*   if( fp != NULL) { */
+  /*     fscanf( "%s", text); */
+  /*     //printf( "%s %f %f %f", text, value, variation, percentage); */
+  /*   } */
+  /*   fclose(fp); */
+  /*   sleep(5); */
+  /* } */
+}
 
 //get stock price using shell script
-void *getStocks(void *arg){
+void *getStocks2(void *arg){
   char status[10], output[100], *aux="Carregando";
   float var, perc, atual, inicial, lucro,full_perc;
   FILE *fp;
