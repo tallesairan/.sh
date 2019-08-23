@@ -6,7 +6,7 @@
 ## no caso, o valor de cartas de magic com a lista de   ##
 ## nomes na entrada                                     ##
 ## <div class="menor-preco" id="omoMenorPreco">*</div>  ##
-## Felipe Viglioni                                      ##
+##  Viglioni                                      ##
 ##########################################################
 
 

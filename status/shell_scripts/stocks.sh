@@ -7,7 +7,7 @@ function Main(){
     then
     	echo "error"
     else
-	paragraph=$(w3m "http://cotacoes.economia.uol.com.br/acao/index.html?codigo=$stock.SA" |grep Horário -A 2)
+	paragraph=$(w3m "https://finance.yahoo.com/quote/USIM5.SA" |grep BRL -A 2)
 	paragraph=$(echo $paragraph | tr , .)
 	word=( ${paragraph} )
 	

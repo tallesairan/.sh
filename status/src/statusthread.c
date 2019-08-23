@@ -4,8 +4,9 @@
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <math.h>
 
-#define NUMTHREADS 6
+#define NUMTHREADS 7
 #define STOCK_QTTY 600
 #define STOCK_VALUE 10.13
 #define STOCK_QTTY2 0
@@ -19,18 +20,15 @@ void *updateTime(void *arg);
 void *getVolume(void *arg);
 void *getMemory(void *arg);
 void *getStocks2(void *arg);
+void *getBattery(void *arg);
 
 char *weekrussian(int num);
 char *monthrussian(int num);
 char *dayrussian(int num);
 
 // structures
-typedef struct{
-  char *day; 
-  char *weekday;
-  char *month;
-  int h,m,s,y;
-} DateTime;
+
+
 
 typedef struct {
   char *status;
@@ -39,15 +37,18 @@ typedef struct {
 
 // global variables
 
-volatile DateTime datetime;
+
 pthread_t th[NUMTHREADS];
 pthread_mutex_t mutex;
 volatile struct tm *current;
-volatile int vol;
+volatile char *vol;
 volatile Stock stocks;
 volatile Stock stocks2;
 volatile float total;
 volatile char *memory;
+volatile char *battery;
+volatile char *time_now;
+volatile char *date;
 
 // main
 
@@ -55,16 +56,10 @@ int main() {
   int err[NUMTHREADS], i=0;
   pthread_mutex_init(&mutex,NULL);
 
-  system("echo inicializando");
+  system("echo Hello There");
 
   total = 0;
   
-  pthread_mutex_lock(&mutex);
-  datetime.day = "";
-  datetime.weekday = "";
-  datetime.month = "";
-  datetime.h = datetime.m = datetime.s = datetime.y = 0;
-  pthread_mutex_unlock(&mutex);
     
   err[i] = pthread_create(&(th[i]),NULL,&printInfo,NULL);
   i++;
@@ -77,6 +72,8 @@ int main() {
   err[i] = pthread_create(&(th[i]),NULL,&getStocks,NULL);
   i++;
   err[i] = pthread_create(&(th[i]),NULL,&getMemory,NULL);
+  i++;
+  err[i] = pthread_create(&(th[i]),NULL,&getBattery,NULL);
   /* i++; */
   /* err[i] = pthread_create(&(th[i]),NULL,&getStocks2,NULL); */
 
@@ -90,10 +87,6 @@ int main() {
   for(int i=0; i<NUMTHREADS; i++)
     (void) pthread_join(th[i],NULL);
 
-
-
-
-
   return 0;
 }
 
@@ -102,15 +95,13 @@ int main() {
 
 // print all info
 void *printInfo(void *arg) {
-  char output[250];
+  char output[270];
   sleep(2);
   while(1){
     pthread_mutex_lock(&mutex);
-    /* // print com duas threads de stocks */
-    /* sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %d%% - BEES3: %s %.2f %.2f (%.2f%%) ∵ R$ %.2f (%.2f%%) - USIM5: %s %.2f %.2f (%.2f%%) ∵ R$ %.2f (%.2f%%) ₢ total: %.2f' ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol,stocks.status,stocks.atual,stocks.var,stocks.perc, stocks.lucro, stocks.full_perc,stocks2.status,stocks2.atual,stocks2.var,stocks2.perc, stocks2.lucro, stocks2.full_perc, total); */
 
     // print com uma thread de stock
-    sprintf(output,"echo '%s - %s, %s, %d - %02d:%02d:%02d - ♫: %d%% - USIM5: %s %.2f %.2f (%.2f%%)  ∵ R$ %.2f (%.2f%%) '∵ %s ",datetime.weekday,datetime.day,datetime.month,datetime.y,datetime.h,datetime.m,datetime.s,vol,stocks.status,stocks.atual,stocks.var,stocks.perc, stocks.lucro, stocks.full_perc, memory);
+    sprintf(output,"echo '%s %s ∵ %s ∵ %s ∵ %s'", date, time_now,vol, memory, battery);
     
     system(output);
     pthread_mutex_unlock(&mutex);
@@ -119,9 +110,42 @@ void *printInfo(void *arg) {
   return NULL;
 }
 
+void *getBattery(void *arg) {
+  char phrase[27] , status[12];
+  float bat, actual, total;
+  FILE *f_actual = NULL, *f_total = NULL, *f_status=NULL;
+  while(1) {
+    bat = -1;
+    
+    f_actual = fopen("/sys/class/power_supply/BAT0/charge_now","r");
+    f_total = fopen("/sys/class/power_supply/BAT0/charge_full","r");
+    f_status = fopen("/sys/class/power_supply/BAT0/status","r");
+    
+    if(f_actual != NULL && f_total != NULL && f_status != NULL){
+      fscanf(f_actual,"%f", &actual);
+      fscanf(f_total, "%f", &total);
+      fscanf(f_status, "%s", status);
+      bat = actual/total*100;
+      sprintf(phrase, "Battery: %.0f%% %s", bat, status);
+    }
+    
+    fclose(f_actual);
+    fclose(f_total);
+
+    
+    pthread_mutex_lock(&mutex);
+    battery = phrase;
+    pthread_mutex_unlock(&mutex);
+    
+    usleep(200000);
+      
+  }
+}
+
 // get the system sound volume using shell script
 void *getVolume(void *arg) {
   int volume;
+  char phrase[8];
   FILE *fp = NULL;
 
   while(1) {
@@ -130,11 +154,12 @@ void *getVolume(void *arg) {
 
     if (fp != NULL ){
       fscanf(fp,"%d",&volume);
+      sprintf(phrase, "♫: %d%%", volume);
     }
     pclose(fp);
     
     pthread_mutex_lock(&mutex);
-    vol = volume;
+    vol = phrase;
     pthread_mutex_unlock(&mutex);
 
     usleep(100000);
@@ -210,7 +235,7 @@ void *getStocks(void *arg){
   
   while (1) {
     pthread_mutex_lock(&mutex);
-    hour = datetime.h;
+    hour = 12 ;//datetime.h;
     pthread_mutex_unlock(&mutex);
 
     if(hour >= 10 && hour <= 18) {
@@ -250,109 +275,26 @@ void *getStocks(void *arg){
   } 
 }
 
-void *getStocks2(void *arg){
-  char status[10], output[100], *aux="Carregando";
-  float var, perc, atual, inicial, lucro,full_perc;
-  FILE *fp;
-  int hour;
-
-  inicial = STOCK_QTTY2 * STOCK_VALUE2;
-
-  pthread_mutex_lock(&mutex);
-  stocks2.var = 0;
-  stocks2.perc = 0;
-  stocks2.atual = 0;
-  stocks2.full_perc = 0;
-  stocks2.status = aux;
-  stocks2.lucro = 0;
-  total = stocks.lucro + stocks2.lucro;
-  pthread_mutex_unlock(&mutex);
-
-  fp = popen("~/.sh/status/shell_scripts/stocks2.sh usim5","r");
-
-  if (fp != NULL ){
-    fscanf(fp,"%s",status);
-    fscanf(fp,"%f",&var);
-    fscanf(fp,"%f",&perc);
-    fscanf(fp,"%f",&atual);
-
-    lucro = atual*STOCK_QTTY2 - inicial;
-    if(inicial != 0)
-      full_perc = 100*lucro/inicial;
-    else
-      full_perc = 0;
-  }
-
-  pthread_mutex_lock(&mutex);
-  stocks2.var = var;
-  stocks2.perc = perc;
-  stocks2.atual = atual;
-  stocks2.full_perc = full_perc;
-  stocks2.status = status;
-  stocks2.lucro = lucro;
-  total = stocks.lucro + stocks2.lucro;
-  pthread_mutex_unlock(&mutex);
-
-  sleep(30);
-  
-  while (1) {
-    pthread_mutex_lock(&mutex);
-    hour = datetime.h;
-    pthread_mutex_unlock(&mutex);
-
-    if(hour >= 10 && hour <= 18) {
-
-      fp = popen("~/.sh/status/shell_scripts/stocks2.sh usim5","r");
-
-      if (fp != NULL ){
-	fscanf(fp,"%s",status);
-	fscanf(fp,"%f",&var);
-	fscanf(fp,"%f",&perc);
-	fscanf(fp,"%f",&atual);
-
-	lucro = atual*STOCK_QTTY2 - inicial;
-	if(inicial != 0)
-	  full_perc = 100*lucro/inicial;
-	else
-	  full_perc = 0;
-      }
-
-      pthread_mutex_lock(&mutex);
-      stocks2.var = var;
-      stocks2.perc = perc;
-      stocks2.atual = atual;
-      stocks2.full_perc = full_perc;
-      stocks2.status = status;
-      stocks2.lucro = lucro;
-      total = stocks.lucro + stocks2.lucro;
-      pthread_mutex_unlock(&mutex);
-    }
-    else {
-      pthread_mutex_lock(&mutex);
-      strcpy(status,"fechado");
-      stocks2.status = status;
-      pthread_mutex_unlock(&mutex);
-    }
-    sleep(30);
-  } 
-}
 
 
 // every 250000ns = 0.25s updates date and time variable (datetime.current) and .time
 void *updateTime(void *arg){
+  char phrase[10];
   time_t aux;
   int h,m,s;
-  struct tm *tempo;
+
   while(1){
-    pthread_mutex_lock(&mutex);
+   pthread_mutex_lock(&mutex);
     time(&aux);
     current = localtime(&aux);
 
-    datetime.h = current->tm_hour;
-    datetime.m = current->tm_min;
-    datetime.s = current->tm_sec;
+    h = current->tm_hour;
+    m = current->tm_min;
+    s = current->tm_sec;
     
-
+    sprintf(phrase, "%02d:%02d:%02d",h,m,s);
+    
+    time_now = phrase;
     pthread_mutex_unlock(&mutex);
     usleep(250000);
   }
@@ -362,7 +304,7 @@ void *updateTime(void *arg){
 // Gets the .current info and put'em in .weekday .month .day
 void *getDate(void *arg) {
   int day,week,month,year;
-  char *aux_day, *aux_week, *aux_month;
+  char *aux_day, *aux_week, *aux_month, phrase[40];
   while(1){
     pthread_mutex_lock(&mutex);
     day = current->tm_mday;
@@ -375,11 +317,13 @@ void *getDate(void *arg) {
     aux_week = weekrussian(week);
     aux_month = monthrussian(month);
 
+    
+    
+
+    sprintf(phrase, "%s - %s, %s, %d -", aux_week, aux_day,aux_month, year+1900);
+
     pthread_mutex_lock(&mutex);
-    datetime.day = aux_day;
-    datetime.weekday = aux_week;
-    datetime.month = aux_month;
-    datetime.y = year+1900;
+    date = phrase;
     pthread_mutex_unlock(&mutex);
 
     sleep(60);
