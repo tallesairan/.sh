@@ -2,24 +2,13 @@
 
 stock=$1
 
-function Main(){
-     if [ "$stock" == "" ];
+Main () {
+     if [ "$stock" = "" ];
     then
-    	echo "error"
+    	echo "-1 -1 -1" #error
     else
-	paragraph=$(w3m "https://finance.yahoo.com/quote/USIM5.SA" |grep BRL -A 2)
-	paragraph=$(echo $paragraph | tr , .)
-	word=( ${paragraph} )
-	
-	status=${word[9]}
-	var=${word[11]}
-	if [ "$var" == "0.00" ]
-	then
-	    status="estável"
-	fi
-	perc=${word[12]}
-	atual=${word[13]}
-	echo $status $var $perc $atual
+	paragraph=$(w3m "https://finance.yahoo.com/quote/$stock.SA" |grep BRL -A 2)
+	echo $paragraph | sed 's/.*BRL//'  | sed 's/[^-.0-9 ]*//g'
      fi
 }
 

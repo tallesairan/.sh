@@ -127,11 +127,12 @@ void *getBattery(void *arg) {
       fscanf(f_status, "%s", status);
       bat = actual/total*100;
       sprintf(phrase, "Battery: %.0f%% %s", bat, status);
+      fclose(f_actual);
+      fclose(f_total);
+      fclose(f_status);
     }
     
-    fclose(f_actual);
-    fclose(f_total);
-    fclose(f_status);
+    
     f_actual = NULL;
     f_total = NULL;
     f_status=NULL;
@@ -153,13 +154,15 @@ void *getVolume(void *arg) {
 
   while(1) {
     volume = -1;
+    
     fp = popen("~/.sh/status/shell_scripts/getVolume.sh","r");
 
     if (fp != NULL ){
       fscanf(fp,"%d",&volume);
       sprintf(phrase, "♫: %d%%", volume);
+      pclose(fp);
     }
-    pclose(fp);
+    
     fp = NULL;
     pthread_mutex_lock(&mutex);
     vol = phrase;
@@ -178,8 +181,8 @@ void *getMemory(void *arg) {
 
     if (fp != NULL ){
       fgets(mem,30,fp);
+      pclose(fp);
     }
-    pclose(fp);
     fp = NULL;
     pthread_mutex_lock(&mutex);
     memory = mem;
@@ -189,18 +192,22 @@ void *getMemory(void *arg) {
 }
 
 void *getStocks(void *arg) {
-  /* FILE *fp = NULL; */
-  /* char text[100]; */
-  /* float value, variation, percentage; */
-  /* while(1){ */
-  /*   fp = popen('w3m "https://finance.yahoo.com/quote/USIM5.SA" |grep BRL -A 2',"r"); */
-  /*   if( fp != NULL) { */
-  /*     fscanf( "%s", text); */
-  /*     //printf( "%s %f %f %f", text, value, variation, percentage); */
-  /*   } */
-  /*   fclose(fp); */
-  /*   sleep(5); */
-  /* } */
+  FILE *fp = NULL;
+  char text[200];
+  float value, variation, percentage;
+  while(1){
+    
+     fp = popen("~/.sh/status/shell_scripts/stocks.sh usim5","r");
+    if( fp != NULL) {
+      fscanf( fp,"%s %s %s %s %s %s %s %s %s %s %f %f %f", text, text, text, text, text, text, text, text, text, text, &value, &variation, &percentage);
+      
+      printf("%f %f %f\n", value, variation, percentage);
+      //printf( "%s %f %f %f", text, value, variation, percentage);
+      fclose(fp);
+    }
+    
+    sleep(5);
+  }
 }
 
 //get stock price using shell script
