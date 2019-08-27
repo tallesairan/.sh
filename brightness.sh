@@ -1,4 +1,5 @@
-monitor=$(xrandr | grep " connected" | cut -f1 -d " ")
+monitor=$(xrandr | grep " connected" | cut -f1 -d " " | sed -n 1p)
+secondary=$(xrandr | grep " connected" | cut -f1 -d " " | sed -n 2p)
 option=$1
 
 main(){
@@ -16,7 +17,11 @@ decrease(){
     then
 	new_val=0.2
     fi
+    # primary monitor
     xrandr --output $monitor --brightness $new_val
+    if [ "$secondary" != "" ];
+    then xrandr --output $secondary --brightness $new_val
+    fi
     echo "Brightness level is $new_val"
 }
 
@@ -27,6 +32,10 @@ increase(){
 	new_val=1.0
     fi
     xrandr --output $monitor --brightness $new_val
+    if [ "$secondary" != "" ];
+    then xrandr --output $secondary --brightness $new_val
+    fi
+
     echo "Brightness level is $new_val"
 }
 
